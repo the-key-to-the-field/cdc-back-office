@@ -17,6 +17,9 @@ import {
   DropdownItem,
 } from "@heroui/react";
 import { Editor } from "@tiptap/react";
+import { HexColorPicker } from "react-colorful";
+import { useState, useRef } from 'react';
+import { useOnClickOutside } from 'usehooks-ts';
 
 interface ToolbarProps {
   editor: Editor | null;
@@ -40,29 +43,6 @@ const fontSizes = [
   "96px",
 ];
 
-const colors = [
-  "#000000",
-  "#434343",
-  "#666666",
-  "#999999",
-  "#b7b7b7",
-  "#cccccc",
-  "#d9d9d9",
-  "#efefef",
-  "#f3f3f3",
-  "#ffffff",
-  "#980000",
-  "#ff0000",
-  "#ff9900",
-  "#ffff00",
-  "#00ff00",
-  "#00ffff",
-  "#4a86e8",
-  "#0000ff",
-  "#9900ff",
-  "#ff00ff",
-];
-
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6 | 0;
 
 const headingLevels: { label: string; level: HeadingLevel }[] = [
@@ -76,6 +56,16 @@ const headingLevels: { label: string; level: HeadingLevel }[] = [
 ];
 
 export default function Toolbar({ editor, onPreviewClick }: ToolbarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenColor, setIsOpenColor] = useState(false);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
+
+  useOnClickOutside(colorPickerRef, () => setIsOpenColor(false));
+
+  // const handleOpenChange = (isOpen: boolean) => {
+  //   setIsOpenColor(isOpen);
+  // };
+
   return (
     <div className="px-4 py-3 rounded-t-lg flex flex-row justify-between items-center border border-gray-200 bg-gray-50">
       <div className="flex flex-row gap-1 justify-center items-center">
@@ -206,7 +196,7 @@ export default function Toolbar({ editor, onPreviewClick }: ToolbarProps) {
           <ChatBubbleLeftRightIcon className="w-4 h-4" />
         </Button>
         <div className="w-px h-6 bg-gray-200 mx-1" />
-        <Dropdown>
+        <Dropdown isOpen={isOpen} onOpenChange={setIsOpen}>
           <DropdownTrigger>
             <Button
               className="text-gray-700 hover:bg-gray-200 min-w-[80px] flex items-center gap-1"
@@ -214,7 +204,7 @@ export default function Toolbar({ editor, onPreviewClick }: ToolbarProps) {
               variant="light"
             >
               <span className="text-xs w-12 text-left">
-                {editor?.getAttributes("fontSize").fontSize || "16px"}
+                {editor?.getAttributes('textStyle').fontSize || "16px"}
               </span>
             </Button>
           </DropdownTrigger>
@@ -222,7 +212,7 @@ export default function Toolbar({ editor, onPreviewClick }: ToolbarProps) {
             aria-label="Font sizes"
             className="max-h-[400px] overflow-y-auto"
             selectedKeys={[
-              editor?.getAttributes("fontSize").fontSize || "16px",
+              editor?.getAttributes('textStyle').fontSize || "16px",
             ]}
             onAction={(size) =>
               editor
@@ -239,44 +229,32 @@ export default function Toolbar({ editor, onPreviewClick }: ToolbarProps) {
             ))}
           </DropdownMenu>
         </Dropdown>
-        <Dropdown>
-          <DropdownTrigger>
-            <Button
-              className="text-gray-700 hover:bg-gray-200 flex items-center gap-1"
-              size="sm"
-              variant="light"
-            >
-              <div
-                className="w-4 h-4 rounded border border-gray-300"
-                style={{
-                  backgroundColor:
-                    editor?.getAttributes("textStyle").color || "black",
+        <div className="relative" ref={colorPickerRef}>
+          <Button
+            className="text-gray-700 hover:bg-gray-200 flex items-center gap-1"
+            size="sm"
+            variant="light"
+            onPress={() => setIsOpenColor(!isOpenColor)}
+          >
+            <div
+              className="w-4 h-4 rounded border border-gray-300"
+              style={{
+                backgroundColor:
+                  editor?.getAttributes("textStyle").color || "black",
+              }}
+            />
+          </Button>
+          {isOpenColor && (
+            <div className="absolute top-10 left-0">
+              <HexColorPicker
+                color={editor?.getAttributes("textStyle").color || "#000000"}
+                onChange={(color) => {
+                  editor?.chain().focus().setColor(color).run();
                 }}
               />
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu aria-label="Text colors" className="min-w-[240px]">
-            <DropdownItem key="colors" className="p-2">
-              <div className="grid grid-cols-10 gap-1">
-                {colors.map((color) => (
-                  <button
-                    key={color}
-                    className={`w-5 h-5 rounded hover:opacity-80 border border-gray-200 ${
-                      editor?.getAttributes("textStyle").color === color
-                        ? "ring-2 ring-offset-1 ring-black"
-                        : ""
-                    }`}
-                    style={{ backgroundColor: color }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      editor?.chain().focus().setColor(color).run();
-                    }}
-                  />
-                ))}
-              </div>
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+            </div>
+          )}
+        </div>
         <div className="w-px h-6 bg-gray-200 mx-1" />
         <Button
           isIconOnly

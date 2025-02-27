@@ -33,10 +33,11 @@ export const Sidebar = () => {
   return (
     <div
       className={`relative text-white shadow-lg transition-width duration-300 ease-in-out  ${
-        isOpen ? "w-64" : "w-18"
+        isOpen ? "w-64" : "w-[50px]"
       }`}
     >
-      <aside className={`h-screen bg-gray-900  ${isOpen ? "w-64" : "w-18"}`}>
+      <aside className={`min-h-screen bg-gray-900 h-full  ${isOpen ? "w-64" : "w-[50px]"}`}>
+        <div className={`fixed top-0 left-0 ${isOpen ? "w-64" : "w-[50px]"}`}>
         <div className="p-4 flex justify-between items-center">
           <span className="text-xl font-bold">{isOpen && "Sidebar"}</span>
           <button
@@ -70,6 +71,7 @@ export const Sidebar = () => {
             ))}
           </ul>
         </nav>
+        </div>
       </aside>
     </div>
   );
