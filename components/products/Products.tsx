@@ -28,6 +28,7 @@ export const ProductsPage: NextPage = () => {
     limit: watch("limit"),
     keyword: watch("keyword"),
   });
+  console.log("data", data);
 
   const router = useRouter();
 
@@ -43,7 +44,7 @@ export const ProductsPage: NextPage = () => {
       renderCell: (item: Product) => (
         <div className="flex items-center gap-2">
           <Image
-            src={item.image}
+            src={item?.images ? item.images[0] : item.image}
             alt={item.name}
             width={50}
             height={50}

@@ -4,8 +4,9 @@ export interface Product {
   price: number;
   currency?: string | null;
   description: string;
+  images: string[];
   image: string;
-  imageKey: string;
+  imageKeys: string[];
   categoryId: string;
   categoryName: string;
   createdAt: string;
