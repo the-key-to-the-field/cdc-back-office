@@ -36,6 +36,7 @@ export async function uploadFiles(
   const files = formData.getAll("files") as File[];
   try {
     const response = await utapi.uploadFiles(files);
+    console.log("response", response);
     return response.map((result) => ({
       data: result.data
         ? {

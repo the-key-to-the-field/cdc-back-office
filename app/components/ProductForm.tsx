@@ -10,8 +10,6 @@ import { useRouter } from "next/navigation";
 
 import { createProduct, updateProduct } from "@/services/products";
 import { Product } from "@/models/Product";
-import { uploadResponse } from "@/services/uploadthing";
-import {  uploadFiles } from "@/services/uploadthing";
 import { CustomInput } from "@/components/CustomInput";
 import { Category } from "@/models/Category";
 import TipTapEditor from "@/components/tip-tap-editor/TipTapEditor";
@@ -21,9 +19,8 @@ interface ProductFormInputs {
   name: string;
   price?: number | null;
   description: string;
-  image: string;
-  imageKey: string;
-  imageName: string;
+  images: string[];
+  imageKeys: string[];
   categoryId: string;
   currency: string | null;
   content: string;
@@ -33,8 +30,8 @@ const productSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   price: z.number().nullable().optional().default(null),
   description: z.string().min(1, { message: "Description is required" }),
-  image: z.string().min(1, { message: "Image is required" }),
-  imageKey: z.string(),
+  images: z.array(z.string()).min(1, { message: "Image is required" }),
+  imageKeys: z.array(z.string()),
   categoryId: z.string().min(1, { message: "Category is required" }),
   currency: z.string().nullable().optional().default(null),
   content: z.string().min(1, { message: "Content is required" }),
@@ -87,23 +84,7 @@ const ProductForm = ({
     }
   };
 
-  const handleUpload = async (formData: FormData) => {
-    setLoadingImage(true);
-    if (!formData) return;
-    const response: uploadResponse[] = await uploadFiles(formData);
-
-    if (response[0].error) {
-      setErrorImage(response[0].error.message);
-      setLoadingImage(false);
-
-      return;
-    }
-    setValue("imageKey", response[0].data?.key || "");
-    setValue("image", response[0].data?.url || "");
-
-    setLoadingImage(false);
-  };
-
+ 
 
 
 
@@ -118,16 +99,18 @@ const ProductForm = ({
           Stay in add product
         </Switch>
       </div>
-      <FileUploader afterUpload={(url, key) => {
-          setValue("image", url);
-          setValue("imageKey", key);
-        }} errorsMessage={errors.image?.message} image={product?.image} 
-          imageKey={product?.imageKey} />
+      <FileUploader afterUpload={(urls, keys) => {
+        console.log("url", urls);
+        console.log("key", keys);
+          setValue("images", [...(product?.images || []), ...urls as string[]]);
+          setValue("imageKeys", [...(product?.imageKeys || []), ...keys as string[]]);
+        }} errorsMessage={errors.images?.message} images={product?.images} 
+          imageKeys={product?.imageKeys} />
   
       {errorImage && (
         <div className="text-red-500 text-xs mt-1">{errorImage}</div>
       )}
-      {errors.image && (
+      {errors.images && (
         <div className="text-red-500 text-xs mt-1">{`Image is required`}</div>
       )}
 
@@ -171,6 +154,7 @@ const ProductForm = ({
                     value={field.value || ''}
       
                     aria-label="currency"
+                    defaultSelectedKeys={["EUR"]}
                     size="sm"
                     className="min-w-[80px] max-w-[80px] "
                     classNames={{

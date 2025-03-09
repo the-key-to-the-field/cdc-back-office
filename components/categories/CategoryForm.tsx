@@ -48,9 +48,11 @@ export const CategoryForm = ({ initialValues }: CategoryFormProps) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <FileUploader afterUpload={(url, key) => {
-        setValue("image", url);
-        setValue("imageKey", key);
-      }} errorsMessage={errors.image?.message} image={initialValues?.image} imageKey={initialValues?.imageKey} />
+        setValue("image", url[0] || "");
+        setValue("imageKey", key[0] || "");
+      }} errorsMessage={errors.image?.message} 
+      images={initialValues?.image ? [initialValues?.image] : []} 
+      imageKeys={initialValues?.imageKey ? [initialValues?.imageKey] : []} />
       <div>
         <CustomInput
           label="Name"
