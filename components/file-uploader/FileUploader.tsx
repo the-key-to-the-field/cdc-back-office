@@ -18,7 +18,6 @@ interface FileUploaderProps {
 export default function FileUploader({afterUpload, errorsMessage, images = [], imageKeys, multiple = true}: FileUploaderProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [loadingImage, setLoadingImage] = useState(false);
-    const [errorImage, setErrorImage] = useState("");
     const [imageUrls, setImageUrls] = useState<string[]>(images);
 
     const handleUpload = async (formData: FormData) => {
@@ -26,9 +25,7 @@ export default function FileUploader({afterUpload, errorsMessage, images = [], i
         if (!formData) return;
         try {
             const response: uploadResponse[] = await uploadFiles(formData);
-
-            console.log("response", response);
-
+            setLoadingImage(false);
         let newImageUrls: string[] = [];
         let newImageKeys: string[] = [];
 
@@ -134,9 +131,6 @@ export default function FileUploader({afterUpload, errorsMessage, images = [], i
                 </div>
             )}
         </div>
-        {errorImage && (
-            <div className="text-red-500 text-xs mt-1">{errorImage}</div>
-        )}
         {errorsMessage && (
             <div className="text-red-500 text-xs mt-1">{errorsMessage}</div>
         )}
